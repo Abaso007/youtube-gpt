@@ -162,8 +162,7 @@ with tab4:
     def get_text():
         if user_secret:
             st.header("Ask me something about the video:")
-            input_text = st.text_input("You: ","", key="input")
-            return input_text
+            return st.text_input("You: ","", key="input")
     user_input = get_text()
 
     def get_embedding_text(api_key, prompt):
@@ -177,13 +176,12 @@ with tab4:
         df['embedding'] = df['embedding'].apply(eval).apply(np.array)
 
         df['distances'] = distances_from_embeddings(q_embedding, df['embedding'].values, distance_metric='cosine')
-        returns = []
-        
-        # Sort by distance with 2 hints
-        for i, row in df.sort_values('distances', ascending=True).head(4).iterrows():
-            # Else add it to the text that is being returned
-            returns.append(row["text"])
-
+        returns = [
+            row["text"]
+            for i, row in df.sort_values('distances', ascending=True)
+            .head(4)
+            .iterrows()
+        ]
         # Return the context
         return "\n\n###\n\n".join(returns)
 
@@ -201,8 +199,7 @@ with tab4:
             stop=["Q:"],
             temperature=0.2,
         )
-        message = completions.choices[0].text
-        return message
+        return completions.choices[0].text
 
     if user_input:
         text_embedding = get_embedding_text(user_secret, user_input)
